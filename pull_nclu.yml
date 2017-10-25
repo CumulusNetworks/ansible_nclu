@@ -3,7 +3,7 @@
   become: yes
   tasks:
     - name: run show config commands
-      shell: 'net show config commands | grep net | grep -v dot1x | grep -v "del all" > {{inventory_hostname}}_nclu | grep -v printf'
+      shell: 'net show config commands | grep net | grep -v dot1x | grep -v "del all" | grep -v printf > {{inventory_hostname}}_nclu'
       #xxplanation of  grep commands
       # '| grep net' removes all non-net commands (e.g. comments)
       # '| grep -v dot1x removes dot1x commands when not configured, see internal Cumulus Networks bug CM-17143
