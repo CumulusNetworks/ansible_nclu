@@ -2,19 +2,17 @@
 - hosts: all
   become: yes
   tasks:
-    - name: run the net commands
+    - name: Define the NCLU filename as variable called nclu_file
+      set_fact: nclu_file="save_nclu/{{inventory_hostname}}_nclu"
+
+    - name: Load-in the NCLU File as variable called nclu_content
+      set_fact: nclu_content="{{ lookup('file', nclu_file) | regex_replace('^net ') | regex_replace('\nnet ','\n') }}"
+
+    - name: Apply the NCLU Commands
       nclu:
-        commands:
-          - '{{item[4:]}}'
-      with_lines: cat save_nclu/{{inventory_hostname}}_nclu
-      # with_lines loops through each line in the file, and item[4:] strips off the 'net' in front since its redundant with nclu ansible module
-    
+        template: "{{nclu_content}}"
+
     - name: commit the changes
       nclu:
         commit: yes
-      # we commit in a separate stanza so we don't have to "per line" in the stanza above  
-      
-# AUTHOR: Sean Cavanaugh
-# EMAIL: sean@cavanaugh.pro
-# WORK_EMAIL: sean@cumulusnetworks.com
-      
+      # we commit in a separate stanza so we don't have to "per line" in the stanza above
