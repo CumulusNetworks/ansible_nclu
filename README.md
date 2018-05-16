@@ -1,31 +1,39 @@
-# Cumulus Linux NCLU Module for Ansible
-This Git Repo is about Backing up Existing Configurations and replaying them back to your gear with the NCLU module.  Click this link for more info on the [Cumulus Networks NCLU Module](http://docs.ansible.com/ansible/latest/nclu_module.html).
+# Configuration Backup and Restore
 
-![Graphic Illustrating Push and Pull playbooks for NCLU commands](pushpull.png)
+These example playbooks can be used to perform a backup and restoration of configuration using the Network Command Line Utility (NCLU)
 
-## How To Use
+## Prereqs
+* Ansible 2.0+
+* Cumulus 3.3.0+
 
+## Assumptions
+This example was built to work with the [cldemo-vagrant](https://github.com/CumulusNetworks/cldemo-vagrant) reference topology.
+
+## How to Run
 There are two playbooks included in this Git repo.  You can choose to just copy the code down or do a git clone to your local machine (preferred)
 
+1). Clone this repo.
 ```
-git clone https://github.com/seanx820/ansible_nclu
-```
-
-To run the playbook you use the ansible_playbook command.  The two playbooks will be run like this:
-
-```
-ansible-playbook pull_nclu.yml
+cumulus@oob-mgmt-server:$ git clone https://github.com/CumulusNetworks/ansible_nclu.git
+cumulus@oob-mgmt-server:$ cd ./ansible_nclu
 ```
 
-The pull_nclu.yml playbook will create two folders.  One called `save_nclu/<hostname>_nclu` where it is a single flat file per host in your Ansible setup with all the net commands required to rebuild the config. There will also be rendered config (what the config will actually look like if you cat the flat-files (e.g. `/etc/network/interfaces` or `/etc/quagga/Quagga.conf`).  The rendered config will be stored under `config_files/<hostname>`.
-
+## Backup Your Configurations
+2). Run the Configuration Backup Playbook
 ```
-ansible-playbook push_nclu.yml
+cumulus@oob-mgmt-server:$ ansible-playbook pull_nclu.yml
 ```
+At this point, the playbook will create a directory called configuration_storage with subdirectories for each switch. The directory for each switch will be populated with two files, one containing the NCLU commands required to restore the present state, and the other with the output of `net show config files` which will archive the flat files required to restore the state as well.
 
-The push_nclu.yml commands simply replays the net commands back to the switch.  The playbook will look in the `save_nclu` directory for the corresponding host and play each net command back to the host line by line.  The Cumulus Linux NCLU Ansible module is idempotent so each task will return `"GREEN"` i.e. `"OK"` if the net command is already configured.
+Two copies of the files will be created, one that is timestamped and another version which is always prepended with the name "current".
 
+## Restore Your Configurations
+3). Run the Configuration Restore Playbook
+```
+cumulus@oob-mgmt-server:$ ansible-playbook push_nclu.yml
+```
+This playbook will restore your configurations using the NCLU commands prepended with the name "current"
 
 ## Background Info
 
-Prior to the Cumulus Networks NCLU Module for Ansible I wrote this Knowledge Base article on backup and restoring configs on Cumulus Linux here: [https://support.cumulusnetworks.com/hc/en-us/articles/209620358-Ansible-Backing-up-Existing-Configurations](https://support.cumulusnetworks.com/hc/en-us/articles/209620358-Ansible-Backing-up-Existing-Configurations).  This way will still work but for those who want to use the NCLU module and net command soley and not keep track of which files they are touching this gives an alternate method.
+Prior to the Cumulus Networks NCLU Module for Ansible there was a Knowledge Base article on backup and restoring configs on Cumulus Linux here: [https://support.cumulusnetworks.com/hc/en-us/articles/209620358-Ansible-Backing-up-Existing-Configurations](https://support.cumulusnetworks.com/hc/en-us/articles/209620358-Ansible-Backing-up-Existing-Configurations).  This method will still work but for those who want to use the NCLU module and `net` command soley and not keep track of which files they are touching this provides an alternate method.
