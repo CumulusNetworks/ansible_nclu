@@ -8,7 +8,7 @@ This Git Repo is about Backing up Existing Configurations and replaying them bac
 There are two playbooks included in this Git repo.  You can choose to just copy the code down or do a git clone to your local machine (preferred)
 
 ```
-git clone https://github.com/seanx820/ansible_nclu
+git clone https://github.com/CumulusNetworks/ansible_nclu
 ```
 
 To run the playbook you use the ansible_playbook command.  The two playbooks will be run like this:
